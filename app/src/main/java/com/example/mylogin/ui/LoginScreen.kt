@@ -3,58 +3,132 @@ package com.example.mylogin.ui
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import com.example.mylogin.ui.components.EmailInput
+import com.example.mylogin.ui.components.PasswordInput
+import com.example.mylogin.validators.isValidEmail
+import com.example.mylogin.validators.isValidPassword
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
-@androidx.compose.runtime.Composable
+@Composable
 fun LoginScreen() {
-    var username by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("") }
-    var password by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var showError by remember { mutableStateOf(false) }
+    var showSnackbar by remember { mutableStateOf(false) }
+    var snackbarMessage by remember { mutableStateOf("") }
+    var isEmailError by remember { mutableStateOf(false) }
+    var isPasswordError by remember { mutableStateOf(false) }
 
-    androidx.compose.material3.Scaffold(
+    fun signInWithEmailAndPassword(email: String, password: String, onResult: (Boolean) -> Unit) {
+        val auth: FirebaseAuth = Firebase.auth
+
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onResult(true)
+                } else {
+                    onResult(false)
+                }
+            }
+    }
+
+    Scaffold(
+        snackbarHost = {
+            if (showSnackbar) {
+                Snackbar { Text(snackbarMessage) }
+            }
+        },
         topBar = {
-            androidx.compose.material3.CenterAlignedTopAppBar(
-                title = { androidx.compose.material3.Text("Login") }
+            CenterAlignedTopAppBar(
+                title = { Text("Login") }
             )
         }
     ) { innerPadding ->
         Column(
-            modifier = androidx.compose.ui.Modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(16.dp),
         ) {
-            androidx.compose.material3.OutlinedTextField(
-                value = username,
-                onValueChange = { username = it },
-                label = { androidx.compose.material3.Text("Username") },
-                modifier = androidx.compose.ui.Modifier.fillMaxWidth()
+            EmailInput(
+                value = email,
+                onValueChange = { email = it },
+                isError = isEmailError
             )
+            Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = androidx.compose.ui.Modifier.height(16.dp))
-
-            androidx.compose.material3.OutlinedTextField(
+            PasswordInput(
                 value = password,
                 onValueChange = { password = it },
-                label = { androidx.compose.material3.Text("Password") },
-                visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
-                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Password),
-                modifier = androidx.compose.ui.Modifier.fillMaxWidth()
+                isError = isPasswordError
             )
+            Spacer(modifier = Modifier.height(24.dp))
 
-            Spacer(modifier = androidx.compose.ui.Modifier.height(24.dp))
-
-            androidx.compose.material3.Button(
-                onClick = { /*TODO*/ },
-                colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = androidx.compose.ui.graphics.Color.Blue)
-            ) {
-                androidx.compose.material3.Text("Login")
+            if (showError) {
+                Text(
+                    "Email ou senha inválidos",
+                    color = MaterialTheme.colorScheme.error
+                )
             }
+
+            Button(
+                onClick = {
+                    isEmailError = !isValidEmail(email)
+                    isPasswordError = !isValidPassword(password)
+                    if (isEmailError || isPasswordError) {
+                        showError = true
+                        return@Button
+                    }
+
+                    signInWithEmailAndPassword(email, password) { success ->
+                        if (success) {
+                            showSnackbar = true
+                            snackbarMessage = "Login bem-sucedido!"
+                            showError = false
+                        } else {
+                            showError = true
+                        }
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Text("Login")
+            }
+        }
+    }
+
+    // LaunchedEffect para controlar a validação
+    LaunchedEffect(email, password) {
+        // Adiciona um pequeno atraso para evitar validações excessivas
+        delay(500)
+
+        isEmailError = !isValidEmail(email)
+        isPasswordError = !isValidPassword(password)
+
+        if (isEmailError || isPasswordError) {
+            showError = true
         }
     }
 }
