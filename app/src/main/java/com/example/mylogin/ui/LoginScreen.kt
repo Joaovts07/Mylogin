@@ -1,5 +1,6 @@
 package com.example.mylogin.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,12 +14,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
 import com.example.mylogin.ui.components.EmailInput
 import com.example.mylogin.ui.components.PasswordInput
 import com.example.mylogin.validators.isValidEmail
@@ -26,11 +27,10 @@ import com.example.mylogin.validators.isValidPassword
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
-import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen() {
+fun LoginScreen(navController: NavHostController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var showError by remember { mutableStateOf(false) }
@@ -38,6 +38,18 @@ fun LoginScreen() {
     var snackbarMessage by remember { mutableStateOf("") }
     var isEmailError by remember { mutableStateOf(false) }
     var isPasswordError by remember { mutableStateOf(false) }
+
+    fun validateEmail() {
+        if (email.isNotEmpty()) {
+            isEmailError = !isValidEmail(email)
+        }
+    }
+
+    fun validatePassword() {
+        if (password.isNotEmpty()) {
+            isPasswordError = !isValidPassword(password)
+        }
+    }
 
     fun signInWithEmailAndPassword(email: String, password: String, onResult: (Boolean) -> Unit) {
         val auth: FirebaseAuth = Firebase.auth
@@ -72,14 +84,14 @@ fun LoginScreen() {
         ) {
             EmailInput(
                 value = email,
-                onValueChange = { email = it },
+                onValueChange = { validateEmail(); email = it },
                 isError = isEmailError
             )
             Spacer(modifier = Modifier.height(16.dp))
 
             PasswordInput(
                 value = password,
-                onValueChange = { password = it },
+                onValueChange = { validatePassword(); password = it },
                 isError = isPasswordError
             )
             Spacer(modifier = Modifier.height(24.dp))
@@ -116,19 +128,17 @@ fun LoginScreen() {
             ) {
                 Text("Login")
             }
-        }
-    }
+            Spacer(modifier = Modifier.height(16.dp))
 
-    // LaunchedEffect para controlar a validação
-    LaunchedEffect(email, password) {
-        // Adiciona um pequeno atraso para evitar validações excessivas
-        delay(500)
-
-        isEmailError = !isValidEmail(email)
-        isPasswordError = !isValidPassword(password)
-
-        if (isEmailError || isPasswordError) {
-            showError = true
+            Text(
+                text = "Não tem uma conta? Cadastre-se",
+                modifier = Modifier
+                    .clickable { navController.navigate("cadastro") }
+                    .padding(top = 8.dp),
+                color = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
+
+
