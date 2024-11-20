@@ -133,7 +133,7 @@ fun LoginScreen(navController: NavHostController) {
             Text(
                 text = "Não tem uma conta? Cadastre-se",
                 modifier = Modifier
-                    .clickable { navController.navigate("cadastro") }
+                    .clickable { navController.navigate("basicForm") }
                     .padding(top = 8.dp),
                 color = MaterialTheme.colorScheme.primary
             )
