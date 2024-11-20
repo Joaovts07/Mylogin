@@ -1,5 +1,6 @@
 package com.example.mylogin
 
+import RegistrationBasicScreen
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -12,7 +13,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.mylogin.ui.ChoiseForm
-import com.example.mylogin.ui.FormScreenBasic
 import com.example.mylogin.ui.LoginScreen
 import com.example.mylogin.ui.theme.MyLoginTheme
 
@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
             MyLoginTheme {
                 NavHost(navController = navController, startDestination = "login") {
                     composable("login") { LoginScreen(navController) }
-                    composable("basicForm") { FormScreenBasic(navController) }
+                    composable("basicForm") { RegistrationBasicScreen(navController) }
                     composable(
                         "choiseForm/{nome}/{dataNascimento}",
                         arguments = listOf(
