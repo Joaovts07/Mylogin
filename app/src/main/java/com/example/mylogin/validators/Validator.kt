@@ -19,13 +19,19 @@ fun isValidPassword(password: String): Boolean {
 
 fun isValidBirthDate(birthDate: String): Boolean {
     return try {
-        val date = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse(birthDate)
-        val age = Calendar.getInstance().apply { time = date }.get(Calendar.YEAR) -
-                Calendar.getInstance().get(Calendar.YEAR)
+        val date = SimpleDateFormat("ddMMyyyy", Locale.getDefault()).parse(birthDate)
+        val birthYear = Calendar.getInstance().apply { time = date }.get(Calendar.YEAR)
+        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+        val age = currentYear - birthYear
         age >= 18
     } catch (e: Exception) {
         false
     }
+}
+
+fun isValidPhoneNumber(phoneNumber: String): Boolean {
+    val pattern = Regex("""^\(\d{2}\)\s\d{4,5}-\d{4}$""") // (XX) XXXX-XXXX ou (XX) XXXXX-XXXX
+    return pattern.matches(phoneNumber)
 }
 
 class DateMaskTransformation : VisualTransformation {
