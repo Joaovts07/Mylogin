@@ -39,18 +39,6 @@ fun LoginScreen(navController: NavHostController) {
     var isEmailError by remember { mutableStateOf(false) }
     var isPasswordError by remember { mutableStateOf(false) }
 
-    fun validateEmail() {
-        if (email.isNotEmpty()) {
-            isEmailError = !isValidEmail(email)
-        }
-    }
-
-    fun validatePassword() {
-        if (password.isNotEmpty()) {
-            isPasswordError = !isValidPassword(password)
-        }
-    }
-
     fun signInWithEmailAndPassword(email: String, password: String, onResult: (Boolean) -> Unit) {
         val auth: FirebaseAuth = Firebase.auth
 
@@ -83,16 +71,14 @@ fun LoginScreen(navController: NavHostController) {
                 .padding(16.dp),
         ) {
             EmailInput(
-                value = email,
-                onValueChange = { validateEmail(); email = it },
-                isError = isEmailError
+                email = email,
+                onEmailChange = { email = it },
             )
             Spacer(modifier = Modifier.height(16.dp))
 
             PasswordInput(
-                value = password,
-                onValueChange = { validatePassword(); password = it },
-                isError = isPasswordError
+                password = password,
+                onPasswordChange = { password = it },
             )
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -108,7 +94,6 @@ fun LoginScreen(navController: NavHostController) {
                     isEmailError = !isValidEmail(email)
                     isPasswordError = !isValidPassword(password)
                     if (isEmailError || isPasswordError) {
-                        showError = true
                         return@Button
                     }
 

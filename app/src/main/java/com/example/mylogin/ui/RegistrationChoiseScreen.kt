@@ -23,10 +23,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.mylogin.ui.components.EmailInput
+import com.example.mylogin.ui.components.PasswordInput
+import com.example.mylogin.validators.isValidEmail
+import com.example.mylogin.validators.isValidPassword
+import com.example.mylogin.validators.isValidPhoneNumber
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -73,24 +76,19 @@ fun RegistrationChoiseScreen(navController: NavController, nome: String, dataNas
             Spacer(modifier = Modifier.height(24.dp))
 
             if (method == "email") {
-                OutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    label = { Text("Email") },
-                    modifier = Modifier.fillMaxWidth()
+                EmailInput(
+                    email = email,
+                    onEmailChange = { email = it },
                 )
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = { Text("Password") },
-                    modifier = Modifier.fillMaxWidth(),
-
+                PasswordInput(
+                    password = password,
+                    onPasswordChange = { password = it },
                 )
 
             } else {
                 OutlinedTextField(
                     value = telephone,
-                    onValueChange = { telephone = it },
+                    onValueChange = { isValidPhoneNumber(telephone); telephone = it },
                     label = { Text("Telefone") },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -100,13 +98,12 @@ fun RegistrationChoiseScreen(navController: NavController, nome: String, dataNas
             Button(
                 onClick = {
                     if (method == "email") {
+                        if (validateWithEmail(email, password)) return@Button
                         auth.createUserWithEmailAndPassword(email, password)
                             .addOnCompleteListener { task ->
                                 if (task.isSuccessful) {
                                     // Salvar dados adicionais do usuário
                                     // ...
-
-                                    // Enviar email de verificação
                                     auth.currentUser?.sendEmailVerification()
                                         ?.addOnCompleteListener { verificacaoTask ->
                                             if (verificacaoTask.isSuccessful) {
@@ -133,4 +130,15 @@ fun RegistrationChoiseScreen(navController: NavController, nome: String, dataNas
             }
         }
     }
+
 }
+private fun validateWithEmail(
+    email: String,
+    password: String
+): Boolean {
+    val isEmailError1: Boolean = !isValidEmail(email)
+    val isPasswordError1: Boolean = !isValidPassword(password)
+    return isEmailError1 || isPasswordError1
+}
+
+
