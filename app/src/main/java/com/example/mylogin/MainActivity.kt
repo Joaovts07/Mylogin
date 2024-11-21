@@ -12,8 +12,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.mylogin.ui.ChoiseForm
 import com.example.mylogin.ui.LoginScreen
+import com.example.mylogin.ui.RegistrationChoiseScreen
 import com.example.mylogin.ui.theme.MyLoginTheme
 
 class MainActivity : ComponentActivity() {
@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
                             navArgument("dataNascimento") { type = NavType.StringType }
                         )
                     ) { backStackEntry ->
-                        ChoiseForm(
+                        RegistrationChoiseScreen(
                             navController,
                             backStackEntry.arguments?.getString("nome") ?: "",
                             backStackEntry.arguments?.getString("dataNascimento") ?: ""
