@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.mylogin.ui.components.EmailInput
 import com.example.mylogin.ui.components.PasswordInput
+import com.example.mylogin.validators.PhoneNumberMaskTransformation
 import com.example.mylogin.validators.isValidEmail
 import com.example.mylogin.validators.isValidPassword
 import com.google.firebase.Firebase
@@ -184,7 +185,7 @@ fun RegistrationChoiseScreen(navController: NavController, nome: String, dataNas
                     },
                     label = { Text("Phone Number") },
                     modifier = Modifier.fillMaxWidth(),
-                    //visualTransformation = PhoneNumberMaskTransformation(),
+                    visualTransformation = PhoneNumberMaskTransformation(),
                     isError = phoneNumberError,
                     supportingText = {
                         if (phoneNumberError) {
@@ -250,44 +251,6 @@ private fun validateWithEmail(
     return isEmailError1 || isPasswordError1
 }
 
-class PhoneNumberMaskTransformation : VisualTransformation {
-    override fun filter(text: AnnotatedString): TransformedText {
-        val trimmed = if (text.text.length >= 15) text.text.substring(0..14) else text.text
-        val maskedText = buildString {
-            if (trimmed.isNotEmpty()) {
-                append("(")
-                append(trimmed.take(2))
-                append(") ")
-                append(trimmed.substring(2).take(5))
-                append("-")
-                append(trimmed.substring(7))
-            }
-        }
-
-        val translator = object : OffsetMapping {
-            override fun originalToTransformed(offset: Int): Int {
-                return when {
-                    offset <= 0 -> offset
-                    offset <= 2 -> offset + 1
-                    offset <= 7 -> offset + 3
-                    else -> offset + 4
-                }
-            }
-
-            override fun transformedToOriginal(offset: Int): Int {
-                return when {
-                    offset <= 0 -> offset
-                    offset <= 3 -> offset - 1
-                    offset <= 9 -> offset - 3
-                    else -> offset - 4
-                }
-            }
-        }
-
-        return TransformedText(AnnotatedString(maskedText), translator)
-    }
-
-}
 
 
 
