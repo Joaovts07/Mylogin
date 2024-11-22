@@ -1,5 +1,7 @@
 package com.example.mylogin.ui
 
+import android.app.Activity
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,16 +26,27 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.mylogin.ui.components.EmailInput
 import com.example.mylogin.ui.components.PasswordInput
 import com.example.mylogin.validators.isValidEmail
 import com.example.mylogin.validators.isValidPassword
-import com.example.mylogin.validators.isValidPhoneNumber
 import com.google.firebase.Firebase
+import com.google.firebase.FirebaseException
+import com.google.firebase.FirebaseTooManyRequestsException
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.PhoneAuthCredential
+import com.google.firebase.auth.PhoneAuthOptions
+import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.auth.auth
+import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,10 +54,82 @@ fun RegistrationChoiseScreen(navController: NavController, nome: String, dataNas
     var method by remember { mutableStateOf("email") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var telephone by remember { mutableStateOf("") }
+    var phoneNumber by remember { mutableStateOf("") }
+    var showSnackbar by remember { mutableStateOf(false) }
+    var snackbarMessage by remember { mutableStateOf("") }
     val auth: FirebaseAuth = Firebase.auth
+    val context = LocalContext.current
+    val activity = context as Activity
+
+    // Função para fazer login com a credencial
+    fun signInWithPhoneAuthCredential(credential: PhoneAuthCredential) {
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener(activity) { task ->
+            if (task.isSuccessful) {
+                // Login bem-sucedido
+                val user = task.result?.user
+                showSnackbar =  true
+                snackbarMessage = "Login bem sucedido"
+                // ...
+            } else {
+            // Login falhou
+            Log.w("TAG", "signInWithCredential:failure", task.exception)
+            if (task.exception is FirebaseAuthInvalidCredentialsException) {
+                showSnackbar =  true
+                snackbarMessage = "O código de verificação era inválido."
+            }
+            // Atualiza a UI
+        }
+        }
+    }
+
+    // Callbacks para lidar com o código de verificação
+    val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+        override fun onVerificationCompleted(credential: PhoneAuthCredential) {
+            // Essa função é chamada quando a verificação é concluída automaticamente,
+            // como em alguns dispositivos com o Google Play Services.
+            // Você pode usar a credencial para fazer login do usuário diretamente.
+            signInWithPhoneAuthCredential(credential) // Função para fazer login
+        }
+
+        override fun onVerificationFailed(e: FirebaseException) {
+            // Essa função é chamada quando a verificação falha, por exemplo,
+            // número de telefone inválido, limite de SMS atingido, etc.
+            // Exiba uma mensagem de erro para o usuário.
+            Log.w("TAG", "onVerificationFailed", e)
+            showSnackbar = true
+            if (e is FirebaseAuthInvalidCredentialsException) {
+                snackbarMessage = "Número de telefone inválido."
+            } else if (e is FirebaseTooManyRequestsException) {
+                snackbarMessage = "O limite de SMS foi atingido."
+            }
+
+            // Mostra uma mensagem de erro para o usuário
+            //showErrorSnackbar("Verification failed: ${e.message}")
+        }
+
+        override fun onCodeSent(
+            verificationId: String,
+            token: PhoneAuthProvider.ForceResendingToken) {
+            // Essa função é chamada quando o código de verificação é enviado por SMS.
+            // Salve o verificationId e navegue para a tela de confirmação de SMS.
+            val storedVerificationId = verificationId
+            val resendToken = token
+
+            val phoneNumber = phoneNumber.filter { it.isDigit() } // Remove a máscara
+            navController.navigate(
+                "confirmation/sms/${phoneNumber}/${storedVerificationId}/{$resendToken}")
+        }
+    }
+
+
 
     Scaffold(
+        snackbarHost = {
+            if (showSnackbar) {
+                Snackbar { Text(snackbarMessage) }
+            }
+        },
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("Cadastro - Passo 2") }
@@ -75,6 +161,7 @@ fun RegistrationChoiseScreen(navController: NavController, nome: String, dataNas
             }
             Spacer(modifier = Modifier.height(24.dp))
 
+
             if (method == "email") {
                 EmailInput(
                     email = email,
@@ -86,11 +173,24 @@ fun RegistrationChoiseScreen(navController: NavController, nome: String, dataNas
                 )
 
             } else {
+                var phoneNumberError by remember { mutableStateOf(false) }
+
                 OutlinedTextField(
-                    value = telephone,
-                    onValueChange = { isValidPhoneNumber(telephone); telephone = it },
-                    label = { Text("Telefone") },
-                    modifier = Modifier.fillMaxWidth()
+                    value = phoneNumber,
+                    onValueChange = {
+                        if (it.length <= 15) {  // Limita o número de caracteres
+                            phoneNumber = it.filter { char -> char.isDigit() || char == '(' || char == ')' || char == '-' || char == ' ' }
+                        }
+                    },
+                    label = { Text("Phone Number") },
+                    modifier = Modifier.fillMaxWidth(),
+                    //visualTransformation = PhoneNumberMaskTransformation(),
+                    isError = phoneNumberError,
+                    supportingText = {
+                        if (phoneNumberError) {
+                            Text("Invalid phone number")
+                        }
+                    }
                 )
             }
 
@@ -107,10 +207,9 @@ fun RegistrationChoiseScreen(navController: NavController, nome: String, dataNas
                                     auth.currentUser?.sendEmailVerification()
                                         ?.addOnCompleteListener { verificacaoTask ->
                                             if (verificacaoTask.isSuccessful) {
-                                                // Navegar para a tela de confirmação
-                                                navController.navigate("confirmacao_email")
+                                                navController.navigate("confirmationScreen/${email}")
                                             } else {
-                                                // Exibir mensagem de erro
+                                                navController.navigate("confirmation/sms/${phoneNumber}") // Para SMS
                                             }
                                         }
                                 } else {
@@ -118,8 +217,16 @@ fun RegistrationChoiseScreen(navController: NavController, nome: String, dataNas
                                 }
                             }
                     } else {
-                        // TODO: Implementar lógica de cadastro com telefone
+                        val phoneNumber = "+55${phoneNumber.filter { it.isDigit() }}" // Ajustar para formato E.164
+                        val options = PhoneAuthOptions.newBuilder(auth)
+                            .setPhoneNumber(phoneNumber)
+                            .setTimeout(60L, TimeUnit.SECONDS)
+                            .setActivity(activity) // Passar a Activity atual
+                            .setCallbacks(callbacks) // Definir callbacks para lidar com o código de verificação
+                            .build()
+                        PhoneAuthProvider.verifyPhoneNumber(options)
                     }
+
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
@@ -128,7 +235,9 @@ fun RegistrationChoiseScreen(navController: NavController, nome: String, dataNas
             ) {
                 Text("Concluir Cadastro")
             }
+
         }
+
     }
 
 }
@@ -140,5 +249,46 @@ private fun validateWithEmail(
     val isPasswordError1: Boolean = !isValidPassword(password)
     return isEmailError1 || isPasswordError1
 }
+
+class PhoneNumberMaskTransformation : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText {
+        val trimmed = if (text.text.length >= 15) text.text.substring(0..14) else text.text
+        val maskedText = buildString {
+            if (trimmed.isNotEmpty()) {
+                append("(")
+                append(trimmed.take(2))
+                append(") ")
+                append(trimmed.substring(2).take(5))
+                append("-")
+                append(trimmed.substring(7))
+            }
+        }
+
+        val translator = object : OffsetMapping {
+            override fun originalToTransformed(offset: Int): Int {
+                return when {
+                    offset <= 0 -> offset
+                    offset <= 2 -> offset + 1
+                    offset <= 7 -> offset + 3
+                    else -> offset + 4
+                }
+            }
+
+            override fun transformedToOriginal(offset: Int): Int {
+                return when {
+                    offset <= 0 -> offset
+                    offset <= 3 -> offset - 1
+                    offset <= 9 -> offset - 3
+                    else -> offset - 4
+                }
+            }
+        }
+
+        return TransformedText(AnnotatedString(maskedText), translator)
+    }
+
+}
+
+
 
 
