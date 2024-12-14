@@ -8,8 +8,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import java.text.SimpleDateFormat
 import java.util.*
 
-// Funções de validação
-fun isValidEmail(email: String): Boolean {
+ fun isValidEmail(email: String): Boolean {
     return Patterns.EMAIL_ADDRESS.matcher(email).matches()
 }
 
