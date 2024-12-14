@@ -6,7 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview  
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,11 +16,8 @@ import com.example.mylogin.ui.ConfirmationScreen
 import com.example.mylogin.ui.LoginScreen
 import com.example.mylogin.ui.RegistrationChoiseScreen
 import com.example.mylogin.ui.theme.MyLoginTheme
-import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 
-class MainActivity : ComponentActivity() {
+public class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -55,8 +52,7 @@ class MainActivity : ComponentActivity() {
                             phoneNumber = phoneNumber,
                             onResendClick = {
                                 // Lógica para reenviar email ou SMS
-                            },
-                            navController = navController
+                            }
                         )
                     }
                 }

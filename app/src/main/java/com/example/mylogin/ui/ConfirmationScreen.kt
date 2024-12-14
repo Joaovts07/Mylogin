@@ -30,12 +30,11 @@ import com.google.firebase.auth.auth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ConfirmationScreen(
-    verificationType: String, // Parâmetro para o tipo de verificação
-    email: String? = null, // Email, se aplicável
-    phoneNumber: String? = null, // Número de telefone, se aplicável
+public fun ConfirmationScreen(
+    verificationType: String,
+    email: String? = null,
+    phoneNumber: String? = null,
     onResendClick: () -> Unit,
-    navController: NavController
 ) {
     Scaffold(
         topBar = {

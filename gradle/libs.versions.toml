@@ -1,17 +1,17 @@
 [versions]
-agp = "8.7.1"
-firebaseBom = "33.6.0"
+agp = "8.7.3"
+firebaseBom = "33.7.0"
 kotlin = "2.0.0"
-coreKtx = "1.13.1"
+coreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
-lifecycleRuntimeKtx = "2.6.1"
-activityCompose = "1.8.0"
-composeBom = "2024.04.01"
+lifecycleRuntimeKtx = "2.8.7"
+activityCompose = "1.9.3"
+composeBom = "2024.12.01"
 firebaseAuthKtx = "23.1.0"
-navigationRuntimeKtx = "2.8.4"
-navigationCompose = "2.8.4"
+navigationRuntimeKtx = "2.8.5"
+navigationCompose = "2.8.5"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
