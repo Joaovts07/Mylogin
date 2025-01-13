@@ -1,4 +1,4 @@
-package com.example.login.ui
+package com.example.mylogin.ui
 
 import android.app.Activity
 import android.util.Log
@@ -187,5 +187,3 @@ fun onResendClick(auth: FirebaseAuth,isEmail: Boolean, activity: Activity, phone
         }
     }
 }
-
-
