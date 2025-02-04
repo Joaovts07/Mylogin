@@ -2,12 +2,15 @@
 .gradle
 /local.properties
 /.idea
-/.idea/misc.xml
-/.idea/deploymentTargetSelector.xml
 .DS_Store
 /build
 /captures
 .externalNativeBuild
 .cxx
 local.properties
+/.kotlin
+/.idea/misc.xml
 /app/google-services.json
+/mylibrary
+
+
