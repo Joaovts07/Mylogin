@@ -3,6 +3,11 @@ package com.example.mylogin.ui.components
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -17,6 +22,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import com.example.mylogin.validators.isValidEmail
 import com.example.mylogin.validators.isValidPassword
 
@@ -53,11 +59,14 @@ fun EmailInput(email: String, onEmailChange: (String) -> Unit) {
 }
 
 @Composable
-fun PasswordInput(password: String, onPasswordChange: (String) -> Unit) {
-
+fun PasswordInput(
+    password: String,
+    onPasswordChange: (String) -> Unit
+) {
+    var isPasswordVisible by remember { mutableStateOf(false) }
     var isPasswordError by remember { mutableStateOf(false) }
 
-    fun validatePassword(password:String) {
+    fun validatePassword(password: String) {
         if (password.isNotEmpty()) {
             isPasswordError = !isValidPassword(password)
         }
@@ -71,14 +80,25 @@ fun PasswordInput(password: String, onPasswordChange: (String) -> Unit) {
             onPasswordChange(it)
         },
         label = { Text("Senha") },
-        visualTransformation = PasswordVisualTransformation(),
+        visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         supportingText = {
             if (isPasswordError) {
-                Text("Senha deve ter pelo menos 6 caracteres",
+                Text(
+                    "Senha deve ter pelo menos 6 caracteres",
                     color = MaterialTheme.colorScheme.error
                 )
+            }
+        },
+        trailingIcon = {
+            val image = if (isPasswordVisible)
+                Icons.Filled.Visibility
+            else Icons.Filled.VisibilityOff
 
+            val description = if (isPasswordVisible) "Ocultar senha" else "Mostrar senha"
+
+            IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+                Icon(imageVector = image, description)
             }
         }
     )
