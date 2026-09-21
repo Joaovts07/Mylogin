@@ -1,15 +1,17 @@
-package com.example.login.data.repository
+package com.example.loginlib.data.repository
 
+import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.tasks.await
-import javax.inject.Inject
 
-class AuthRepositoryImpl @Inject constructor(
-    private val auth: FirebaseAuth,
-    private val firestore: FirebaseFirestore
+class AuthRepositoryImpl(
+    private val auth: FirebaseAuth = Firebase.auth,
+    private val firestore: FirebaseFirestore = Firebase.firestore
 ) : AuthRepository {
 
     override suspend fun login(email: String, password: String): Result<Unit> {

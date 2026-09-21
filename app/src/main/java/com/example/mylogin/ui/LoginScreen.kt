@@ -24,13 +24,12 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.login.firebase.auth
-import com.example.mylogin.components.LoadingButton
+import com.example.loginlib.components.LoadingButton
 import com.example.mylogin.ui.theme.MyLoginTheme
-import com.example.mylogin.ui.components.EmailInput
-import com.example.mylogin.ui.components.PasswordInput
-import com.example.mylogin.validators.isValidEmail
-import com.example.mylogin.validators.isValidPassword
+import com.example.loginlib.components.EmailInput
+import com.example.loginlib.components.PasswordInput
+import com.example.loginlib.validators.isValidEmail
+import com.example.loginlib.validators.isValidPassword
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserInfo
@@ -39,6 +38,7 @@ import com.google.firebase.auth.auth
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(navController: NavHostController, onLoginSuccess: () -> Unit) {
+    val auth: FirebaseAuth = Firebase.auth
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var showError by remember { mutableStateOf(false) }

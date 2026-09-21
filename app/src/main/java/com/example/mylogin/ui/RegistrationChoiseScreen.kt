@@ -33,11 +33,11 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.mylogin.ui.components.EmailInput
-import com.example.mylogin.ui.components.PasswordInput
-import com.example.mylogin.validators.PhoneNumberMaskTransformation
-import com.example.mylogin.validators.isValidEmail
-import com.example.mylogin.validators.isValidPassword
+import com.example.loginlib.components.EmailInput
+import com.example.loginlib.components.PasswordInput
+import com.example.loginlib.validators.PhoneNumberMaskTransformation
+import com.example.loginlib.validators.isValidEmail
+import com.example.loginlib.validators.isValidPassword
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseException
 import com.google.firebase.FirebaseTooManyRequestsException

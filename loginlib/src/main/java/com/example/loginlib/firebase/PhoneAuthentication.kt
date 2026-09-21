@@ -1,4 +1,4 @@
-package com.example.login.firebase
+package com.example.loginlib.firebase
 
 import android.app.Activity
 import android.util.Log
@@ -19,8 +19,6 @@ import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.auth.auth
 import java.util.concurrent.TimeUnit
 
-val auth: FirebaseAuth = Firebase.auth
-
 sealed class PhoneAuthState {
     object Default : PhoneAuthState()
     object Loading : PhoneAuthState()
@@ -34,6 +32,7 @@ fun PhoneAuthentication(
     phoneNumber: String,
     verificationCode: String? = null,
     verificationId: String = "",
+    auth: FirebaseAuth = Firebase.auth,
     onAuthStateChanged: (PhoneAuthState) -> Unit
 ) {
     var authState by remember { mutableStateOf<PhoneAuthState>(PhoneAuthState.Default) }
@@ -48,7 +47,7 @@ fun PhoneAuthentication(
                         authState = PhoneAuthState.Success(it)
                     }
                 } else {
-                    Log.w("TAG", "signInWithCredential:failure", task.exception)
+                    Log.w("PhoneAuthentication", "signInWithCredential:failure", task.exception)
                     if (task.exception is FirebaseAuthInvalidCredentialsException) {
                         authState = PhoneAuthState.Error("Erro autenticação: ${task.exception?.message}")
                     }
@@ -70,7 +69,7 @@ fun PhoneAuthentication(
             }
 
             override fun onVerificationFailed(e: FirebaseException) {
-                Log.w("TAG", "onVerificationFailed", e)
+                Log.w("PhoneAuthentication", "onVerificationFailed", e)
                 authState = when (e) {
                     is FirebaseAuthInvalidCredentialsException ->
                         PhoneAuthState.Error("Número de telefone inválido.")
@@ -103,19 +102,4 @@ fun PhoneAuthentication(
     }
 
     onAuthStateChanged(authState)
-
-   /* // Função para reenviar o código
-    val resendCode = {
-        if (resendToken != null) {
-            authState = PhoneAuthState.Loading
-            val options = PhoneAuthOptions.newBuilder(auth)
-                .setPhoneNumber(phoneNumber)
-                .setTimeout(60L, TimeUnit.SECONDS)
-                .setActivity(activity)
-                .setCallbacks(callbacks)
-                .setForceResendingToken(resendToken!!)
-                .build()
-            PhoneAuthProvider.verifyPhoneNumber(options)
-        }
-    }*/
 }

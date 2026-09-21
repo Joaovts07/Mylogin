@@ -1,0 +1,9 @@
+<resources>
+    <string name="loginlib_email_label">Email</string>
+    <string name="loginlib_email_invalid">Invalid email</string>
+    <string name="loginlib_password_label">Password</string>
+    <string name="loginlib_password_too_short">Password must be at least 6 characters</string>
+    <string name="loginlib_password_show">Show password</string>
+    <string name="loginlib_password_hide">Hide password</string>
+    <string name="loginlib_google_sign_in">Sign in with Google</string>
+</resources>
