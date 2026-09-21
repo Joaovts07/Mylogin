@@ -8,8 +8,8 @@ import androidx.compose.ui.text.input.KeyboardType
 
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.mylogin.validators.DateMaskTransformation
-import com.example.mylogin.validators.isValidBirthDate
+import com.example.loginlib.validators.DateMaskTransformation
+import com.example.loginlib.validators.isValidBirthDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

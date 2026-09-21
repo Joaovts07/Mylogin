@@ -33,8 +33,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.login.firebase.PhoneAuthState
-import com.example.login.firebase.PhoneAuthentication
+import com.example.loginlib.firebase.PhoneAuthState
+import com.example.loginlib.firebase.PhoneAuthentication
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
