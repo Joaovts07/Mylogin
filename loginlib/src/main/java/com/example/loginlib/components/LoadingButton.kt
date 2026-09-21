@@ -1,4 +1,4 @@
-package com.example.mylogin.components
+package com.example.loginlib.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height

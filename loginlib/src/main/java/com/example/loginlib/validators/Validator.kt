@@ -1,4 +1,4 @@
-package com.example.mylogin.validators
+package com.example.loginlib.validators
 
 import android.util.Patterns
 import androidx.compose.ui.text.AnnotatedString
