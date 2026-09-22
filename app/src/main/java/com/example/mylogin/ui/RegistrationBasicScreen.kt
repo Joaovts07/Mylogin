@@ -1,3 +1,5 @@
+package com.example.mylogin.ui
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -7,16 +9,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.loginlib.validators.DateMaskTransformation
-import com.example.loginlib.validators.isValidBirthDate
+import com.example.mylogin.viewmodel.RegistrationBasicViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegistrationBasicScreen(navController: NavController) {
-    var fullName by remember { mutableStateOf("") }
-    var birthDate by remember { mutableStateOf("") }
-    var birthDateError by remember { mutableStateOf(false) }
+    val viewModel: RegistrationBasicViewModel = viewModel { RegistrationBasicViewModel() }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -32,27 +35,23 @@ fun RegistrationBasicScreen(navController: NavController) {
                 .padding(16.dp)
         ) {
             OutlinedTextField(
-                value = fullName,
-                onValueChange = { fullName = it },
+                value = uiState.fullName,
+                onValueChange = viewModel::onFullNameChange,
                 label = { Text("Full Name") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
-                value = birthDate,
-                onValueChange = { date ->
-                    if (date.filter { it.isDigit() }.length <= 8) { // Limita a 8 dígitos
-                        birthDate = date.filter { it.isDigit() }
-                    }
-                },
+                value = uiState.birthDate,
+                onValueChange = viewModel::onBirthDateChange,
                 label = { Text("Birth Date (dd/MM/yyyy)") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 visualTransformation = DateMaskTransformation(),
-                isError = birthDateError,
+                isError = uiState.birthDateError,
                 supportingText = {
-                    if (birthDateError) {
+                    if (uiState.birthDateError) {
                         Text("Invalid date or age under 18.")
                     }
                 }
@@ -63,8 +62,7 @@ fun RegistrationBasicScreen(navController: NavController) {
             Box(modifier = Modifier.fillMaxWidth()) {
                 Button(
                     onClick = {
-                        birthDateError = !isValidBirthDate(birthDate)
-                        if (!birthDateError) {
+                        viewModel.onNextClick { fullName, birthDate ->
                             navController.navigate("choiseForm/${fullName}/${birthDate}")
                         }
                     },

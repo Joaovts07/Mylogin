@@ -7,8 +7,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
-import com.example.mylogin.ui.LoginNavigation
 import com.example.mylogin.ui.LoginScreen
+import com.example.mylogin.ui.navigation.LoginNavigation
 import com.example.mylogin.ui.theme.MyLoginTheme
 
 class MainActivity : ComponentActivity() {
