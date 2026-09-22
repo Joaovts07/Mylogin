@@ -21,10 +21,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,14 +28,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.loginlib.firebase.PhoneAuthState
 import com.example.loginlib.firebase.PhoneAuthentication
-import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
-import kotlinx.coroutines.delay
-import kotlin.time.Duration.Companion.seconds
+import com.example.mylogin.viewmodel.ConfirmationViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,19 +43,16 @@ fun ConfirmationScreen(
     id: String,
     verificationId: String
 ) {
-    val auth: FirebaseAuth = Firebase.auth
+    val viewModel: ConfirmationViewModel = viewModel { ConfirmationViewModel() }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val activity = context as Activity
-    var timeLeft by remember { mutableIntStateOf(60) }
-    var resendEnabled by remember { mutableStateOf(false) }
-    var verificationCode by remember { mutableStateOf("") }
-    var showPhoneAuthentication by remember { mutableStateOf(false) }
 
     @Composable
     fun verifySms(
         formatedPhone: String,
     ) {
-        PhoneAuthentication(activity, formatedPhone, verificationCode, verificationId) { state ->
+        PhoneAuthentication(activity, formatedPhone, uiState.verificationCode, verificationId) { state ->
             when (state) {
                 is PhoneAuthState.CodeSent -> {
 
@@ -95,11 +86,7 @@ fun ConfirmationScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             LaunchedEffect(key1 = Unit) {
-                while (timeLeft > 0) {
-                    delay(1.seconds)
-                    timeLeft -= 1
-                }
-                resendEnabled = true
+                viewModel.startCountdown()
             }
 
             if (verificationType == "email") {
@@ -139,15 +126,8 @@ fun ConfirmationScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 OutlinedTextField(
-                    value = verificationCode,
-                    onValueChange = {
-                        if (it.length < 7) {
-                            verificationCode = it
-                        }
-                        if (it.length == 6) {
-                            showPhoneAuthentication = true
-                        }
-                    },
+                    value = uiState.verificationCode,
+                    onValueChange = viewModel::onVerificationCodeChange,
                     label = { Text("Código") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
 
@@ -160,30 +140,20 @@ fun ConfirmationScreen(
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
                 Button(
-                    onClick = { onResendClick(auth, (verificationType == "email"), activity, id) },
-                    enabled = resendEnabled
+                    onClick = { viewModel.onResendClick((verificationType == "email"), activity, id) },
+                    enabled = uiState.resendEnabled
                 ) {
-                    Text(if (resendEnabled) "Reenviar" else "Reenviar ($timeLeft)")
+                    Text(if (uiState.resendEnabled) "Reenviar" else "Reenviar (${uiState.timeLeft})")
                 }
                 Button(onClick = { navController.popBackStack() }) {
                     Text("Voltar")
                 }
             }
         }
-        if (showPhoneAuthentication ) {
+        if (uiState.showPhoneAuthentication) {
             verifySms(
                 formatedPhone = "+55${id.filter { it.isDigit() }}"
             )
-        }
-    }
-}
-
-fun onResendClick(auth: FirebaseAuth,isEmail: Boolean, activity: Activity, phoneNumber: String? ) {
-    if (isEmail) {
-        auth.currentUser?.sendEmailVerification()
-    } else {
-        if (phoneNumber != null) {
-            //phoneAuthentication(activity, phoneNumber)
         }
     }
 }
