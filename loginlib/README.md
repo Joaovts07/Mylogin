@@ -9,6 +9,16 @@ Reusable Compose UI components + a Firebase Authentication wrapper (email/passwo
 - `com.example.loginlib.data.repository` — `AuthRepository`/`AuthRepositoryImpl`, a thin wrapper over `FirebaseAuth` + `FirebaseFirestore` (email/password login, Google sign-in, user creation/lookup in a `users` Firestore collection).
 - `com.example.loginlib.firebase` — `PhoneAuthentication` composable + `PhoneAuthState`, and `getGoogleIdToken(context, serverClientId)` (a Credential Manager–based helper that returns a Google ID token you can hand to `AuthRepositoryImpl.loginWithGoogle`).
 
+## Module layout (Kotlin Multiplatform)
+
+`:loginlib` is a Kotlin Multiplatform module with a single target today (`androidTarget`):
+
+- `src/commonMain` — platform-independent code: `AuthRepository` (uses `kotlinx.datetime.LocalDate` for the birthday) and the `isValid*` validators.
+- `src/androidMain` — everything Android/Firebase/Compose-specific: `components`, `firebase`, `AuthRepositoryImpl`, the mask `VisualTransformation`s, plus `res/` and `AndroidManifest.xml`.
+- `src/commonTest` — `kotlin.test` tests for the validators, run with `./gradlew :loginlib:testDebugUnitTest`.
+
+Package names are unchanged, so consumers import exactly as before.
+
 ## Setting it up in a consuming app
 
 1. Create/configure a Firebase project with **Authentication** enabled (Email/Password and Google providers), and **Firestore** if you use `createUser`/`checkIfUserExists`.

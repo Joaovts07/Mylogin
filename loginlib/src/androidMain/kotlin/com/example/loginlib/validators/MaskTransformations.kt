@@ -1,37 +1,9 @@
 package com.example.loginlib.validators
 
-import android.util.Patterns
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
-import java.text.SimpleDateFormat
-import java.util.*
-
- fun isValidEmail(email: String): Boolean {
-    return Patterns.EMAIL_ADDRESS.matcher(email).matches()
-}
-
-fun isValidPassword(password: String): Boolean {
-    return password.length >= 6
-}
-
-fun isValidBirthDate(birthDate: String): Boolean {
-    return try {
-        val date = SimpleDateFormat("ddMMyyyy", Locale.getDefault()).parse(birthDate)
-        val birthYear = Calendar.getInstance().apply { time = date }.get(Calendar.YEAR)
-        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-        val age = currentYear - birthYear
-        age >= 18
-    } catch (e: Exception) {
-        false
-    }
-}
-
-fun isValidPhoneNumber(phoneNumber: String): Boolean {
-    val pattern = Regex("""^\(\d{2}\)\s\d{4,5}-\d{4}$""") // (XX) XXXX-XXXX ou (XX) XXXXX-XXXX
-    return pattern.matches(phoneNumber)
-}
 
 class DateMaskTransformation : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
