@@ -1,4 +1,4 @@
-package com.example.mylogin.viewmodel
+package com.example.loginlib.viewmodel
 
 import androidx.lifecycle.ViewModel
 import com.example.loginlib.validators.isValidBirthDate

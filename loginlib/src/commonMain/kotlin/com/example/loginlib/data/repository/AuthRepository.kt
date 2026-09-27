@@ -7,4 +7,5 @@ interface AuthRepository {
     suspend fun loginWithGoogle(idToken: String): Result<Unit>
     suspend fun createUser(name: String, email: String, dateBirthday: LocalDate?): Result<Unit>
     suspend fun checkIfUserExists(userId: String? = null): Boolean
+    suspend fun logout(): Result<Unit>
 }
