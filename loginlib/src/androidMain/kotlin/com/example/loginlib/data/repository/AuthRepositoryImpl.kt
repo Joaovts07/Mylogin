@@ -8,6 +8,9 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.tasks.await
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
 
 class AuthRepositoryImpl(
     private val auth: FirebaseAuth = Firebase.auth,
@@ -31,7 +34,7 @@ class AuthRepositoryImpl(
             Result.failure(e)
         }
     }
-    override suspend fun createUser(name: String, email: String, dateBirthday: Timestamp?): Result<Unit>{
+    override suspend fun createUser(name: String, email: String, dateBirthday: LocalDate?): Result<Unit>{
         val userId = auth.currentUser?.uid ?: ""
         val usersRef = firestore.collection("users").document(userId)
 
@@ -39,7 +42,9 @@ class AuthRepositoryImpl(
             "id" to userId,
             "name" to name,
             "email" to email,
-            "birthday" to dateBirthday
+            "birthday" to dateBirthday?.let {
+                Timestamp(it.atStartOfDayIn(TimeZone.UTC).epochSeconds, 0)
+            }
         )
 
         return try {
