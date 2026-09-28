@@ -1,11 +1,16 @@
-package com.example.mylogin.viewmodel
+package com.example.loginlib.viewmodel
 
+import android.content.Context
+import android.util.Log
+import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.loginlib.data.repository.AuthRepository
 import com.example.loginlib.data.repository.AuthRepositoryImpl
+import com.example.loginlib.firebase.getGoogleIdToken
 import com.example.loginlib.validators.isValidEmail
 import com.example.loginlib.validators.isValidPassword
+import com.example.loginlib.validators.normalizeEmail
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -21,7 +26,8 @@ data class LoginUiState(
     val showError: Boolean = false,
     val showSnackbar: Boolean = false,
     val snackbarMessage: String = "",
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val googleErrorMessage: String? = null
 )
 
 class LoginViewModel(
@@ -44,7 +50,7 @@ class LoginViewModel(
         onLoginSuccess: () -> Unit,
         onNeedsVerification: (email: String, verificationId: String) -> Unit
     ) {
-        val email = _uiState.value.email
+        val email = normalizeEmail(_uiState.value.email)
         val password = _uiState.value.password
 
         _uiState.update { it.copy(isLoading = true) }
@@ -67,6 +73,27 @@ class LoginViewModel(
                 }
             } else {
                 _uiState.update { it.copy(showError = true, isLoading = false) }
+            }
+        }
+    }
+
+    fun loginWithGoogle(context: Context, serverClientId: String, onLoginSuccess: () -> Unit) {
+        _uiState.update { it.copy(isLoading = true, googleErrorMessage = null) }
+        viewModelScope.launch {
+            val result = getGoogleIdToken(context, serverClientId)
+                .mapCatching { idToken -> authRepository.loginWithGoogle(idToken).getOrThrow() }
+            result.onSuccess {
+                if (!authRepository.checkIfUserExists()) {
+                    val user = auth.currentUser
+                    authRepository.createUser(user?.displayName ?: "", user?.email ?: "", null)
+                }
+                _uiState.update { it.copy(isLoading = false) }
+                onLoginSuccess()
+            }.onFailure { e ->
+                Log.e("LoginViewModel", "Google sign-in failed", e)
+                val message = if (e is GetCredentialCancellationException) null
+                    else e.message ?: "Erro ao entrar com Google"
+                _uiState.update { it.copy(isLoading = false, googleErrorMessage = message) }
             }
         }
     }

@@ -4,6 +4,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -18,7 +19,20 @@ class ValidatorTest {
     }
 
     @Test
+    fun emailsWithSurroundingWhitespaceAreValid() {
+        assertTrue(isValidEmail(" user@example.com "))
+        assertTrue(isValidEmail("user@example.com\n"))
+    }
+
+    @Test
+    fun normalizeEmailTrimsWhitespace() {
+        assertEquals("user@example.com", normalizeEmail("\t user@example.com  "))
+    }
+
+    @Test
     fun invalidEmails() {
+        assertFalse(isValidEmail("   "))
+        assertFalse(isValidEmail("us er@example.com"))
         assertFalse(isValidEmail(""))
         assertFalse(isValidEmail("user"))
         assertFalse(isValidEmail("user@"))

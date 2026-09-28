@@ -16,8 +16,11 @@ private val EMAIL_ADDRESS = Regex(
         ")+"
 )
 
+/** Pasted or autofilled emails often carry surrounding whitespace, which is never part of an address. */
+fun normalizeEmail(email: String): String = email.trim()
+
 fun isValidEmail(email: String): Boolean {
-    return EMAIL_ADDRESS.matches(email)
+    return EMAIL_ADDRESS.matches(normalizeEmail(email))
 }
 
 fun isValidPassword(password: String): Boolean {

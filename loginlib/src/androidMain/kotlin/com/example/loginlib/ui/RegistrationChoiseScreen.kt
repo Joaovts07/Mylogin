@@ -1,4 +1,4 @@
-package com.example.mylogin.ui
+package com.example.loginlib.ui
 
 import android.app.Activity
 import androidx.compose.foundation.layout.Column
@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -20,6 +19,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -28,9 +28,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.loginlib.components.EmailInput
+import com.example.loginlib.components.LoadingButton
 import com.example.loginlib.components.PasswordInput
 import com.example.loginlib.validators.PhoneNumberMaskTransformation
-import com.example.mylogin.viewmodel.RegistrationChoiseViewModel
+import com.example.loginlib.viewmodel.RegistrationChoiseViewModel
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,6 +41,13 @@ fun RegistrationChoiseScreen(navController: NavController, nome: String, dataNas
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val activity = context as Activity
+
+    LaunchedEffect(uiState.showSnackbar, uiState.snackbarMessage) {
+        if (uiState.showSnackbar) {
+            delay(3_000)
+            viewModel.onSnackbarShown()
+        }
+    }
 
     Scaffold(
         snackbarHost = {
@@ -105,17 +114,12 @@ fun RegistrationChoiseScreen(navController: NavController, nome: String, dataNas
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-            Button(
+            LoadingButton(
                 onClick = {
                     if (uiState.method == "email") {
-                        viewModel.submitEmail(
-                            onNavigateConfirmation = { email ->
-                                navController.navigate("confirmationScreen/${email}")
-                            },
-                            onNavigateConfirmationSms = { phoneNumber ->
-                                navController.navigate("confirmation/sms/${phoneNumber}")
-                            }
-                        )
+                        viewModel.submitEmail { email ->
+                            navController.navigate("confirmationScreen/email/${email}/none")
+                        }
                     } else {
                         viewModel.submitPhone(activity) { phoneNumber, verificationId, resendToken ->
                             navController.navigate(
@@ -123,15 +127,13 @@ fun RegistrationChoiseScreen(navController: NavController, nome: String, dataNas
                             )
                         }
                     }
-
                 },
-                modifier = Modifier.fillMaxWidth(),
+                isLoading = uiState.isLoading,
+                text = "Concluir Cadastro",
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary
                 )
-            ) {
-                Text("Concluir Cadastro")
-            }
+            )
 
         }
 

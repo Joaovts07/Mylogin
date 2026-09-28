@@ -63,4 +63,13 @@ class AuthRepositoryImpl(
             false
         }
     }
+
+    override suspend fun logout(): Result<Unit> {
+        return try {
+            auth.signOut()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
