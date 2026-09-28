@@ -7,9 +7,12 @@ import com.example.loginlib.validators.isValidEmail
 import com.example.loginlib.validators.isValidPassword
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseException
+import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.FirebaseTooManyRequestsException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
@@ -26,6 +29,7 @@ data class RegistrationChoiseUiState(
     val password: String = "",
     val phoneNumber: String = "",
     val phoneNumberError: Boolean = false,
+    val isLoading: Boolean = false,
     val showSnackbar: Boolean = false,
     val snackbarMessage: String = ""
 )
@@ -61,6 +65,14 @@ class RegistrationChoiseViewModel(
         }
     }
 
+    fun onSnackbarShown() {
+        _uiState.update { it.copy(showSnackbar = false) }
+    }
+
+    private fun showMessage(message: String) {
+        _uiState.update { it.copy(isLoading = false, showSnackbar = true, snackbarMessage = message) }
+    }
+
     private fun signInWithPhoneAuthCredential(activity: Activity, credential: PhoneAuthCredential) {
         auth.signInWithCredential(credential)
             .addOnCompleteListener(activity) { task ->
@@ -77,26 +89,31 @@ class RegistrationChoiseViewModel(
             }
     }
 
-    fun submitEmail(onNavigateConfirmation: (email: String) -> Unit, onNavigateConfirmationSms: (phoneNumber: String) -> Unit) {
+    fun submitEmail(onNavigateConfirmation: (email: String) -> Unit) {
         val state = _uiState.value
-        if (validateWithEmail(state.email, state.password)) return
+        if (state.isLoading) return
+        if (validateWithEmail(state.email, state.password)) {
+            showMessage("Preencha um email e senha válidos.")
+            return
+        }
 
+        _uiState.update { it.copy(isLoading = true) }
         auth.createUserWithEmailAndPassword(state.email, state.password)
             .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    // Salvar dados adicionais do usuário
-                    // ...
-                    auth.currentUser?.sendEmailVerification()
-                        ?.addOnCompleteListener { verificacaoTask ->
-                            if (verificacaoTask.isSuccessful) {
-                                onNavigateConfirmation(state.email)
-                            } else {
-                                onNavigateConfirmationSms(state.phoneNumber)
-                            }
-                        }
-                } else {
-                    // Exibir mensagem de erro
+                if (!task.isSuccessful) {
+                    Log.w("TAG", "createUserWithEmailAndPassword:failure", task.exception)
+                    showMessage(registrationErrorMessage(task.exception))
+                    return@addOnCompleteListener
                 }
+                auth.currentUser?.sendEmailVerification()
+                    ?.addOnCompleteListener { verificationTask ->
+                        if (verificationTask.isSuccessful) {
+                            _uiState.update { it.copy(isLoading = false) }
+                            onNavigateConfirmation(state.email)
+                        } else {
+                            showMessage("Conta criada, mas o email de verificação não foi enviado.")
+                        }
+                    }
             }
     }
 
@@ -145,4 +162,13 @@ class RegistrationChoiseViewModel(
         val isPasswordError1 = !isValidPassword(password)
         return isEmailError1 || isPasswordError1
     }
+}
+
+/** User-facing (pt-BR) message for a failed email/password sign-up. */
+internal fun registrationErrorMessage(e: Exception?): String = when (e) {
+    is FirebaseAuthUserCollisionException -> "Este email já está cadastrado. Entre com Google ou faça login."
+    is FirebaseAuthWeakPasswordException -> "Senha fraca: use pelo menos 6 caracteres."
+    is FirebaseAuthInvalidCredentialsException -> "Email inválido."
+    is FirebaseNetworkException -> "Sem conexão. Tente novamente."
+    else -> "Não foi possível concluir o cadastro."
 }

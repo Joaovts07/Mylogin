@@ -22,7 +22,10 @@ kotlin {
         androidResources {
             enable = true
         }
-        withHostTest {}
+        withHostTest {
+            // Firebase exception constructors call android.text.TextUtils.
+            isReturnDefaultValues = true
+        }
     }
 
     sourceSets {
