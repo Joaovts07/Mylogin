@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.loginlib.validators.isValidEmail
 import com.example.loginlib.validators.isValidPassword
+import com.example.loginlib.validators.normalizeEmail
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseException
 import com.google.firebase.FirebaseNetworkException
@@ -92,13 +93,14 @@ class RegistrationChoiseViewModel(
     fun submitEmail(onNavigateConfirmation: (email: String) -> Unit) {
         val state = _uiState.value
         if (state.isLoading) return
-        if (validateWithEmail(state.email, state.password)) {
+        val email = normalizeEmail(state.email)
+        if (validateWithEmail(email, state.password)) {
             showMessage("Preencha um email e senha válidos.")
             return
         }
 
         _uiState.update { it.copy(isLoading = true) }
-        auth.createUserWithEmailAndPassword(state.email, state.password)
+        auth.createUserWithEmailAndPassword(email, state.password)
             .addOnCompleteListener { task ->
                 if (!task.isSuccessful) {
                     Log.w("TAG", "createUserWithEmailAndPassword:failure", task.exception)
@@ -109,7 +111,7 @@ class RegistrationChoiseViewModel(
                     ?.addOnCompleteListener { verificationTask ->
                         if (verificationTask.isSuccessful) {
                             _uiState.update { it.copy(isLoading = false) }
-                            onNavigateConfirmation(state.email)
+                            onNavigateConfirmation(email)
                         } else {
                             showMessage("Conta criada, mas o email de verificação não foi enviado.")
                         }

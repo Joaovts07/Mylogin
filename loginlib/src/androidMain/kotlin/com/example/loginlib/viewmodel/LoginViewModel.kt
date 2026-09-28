@@ -10,6 +10,7 @@ import com.example.loginlib.data.repository.AuthRepositoryImpl
 import com.example.loginlib.firebase.getGoogleIdToken
 import com.example.loginlib.validators.isValidEmail
 import com.example.loginlib.validators.isValidPassword
+import com.example.loginlib.validators.normalizeEmail
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -49,7 +50,7 @@ class LoginViewModel(
         onLoginSuccess: () -> Unit,
         onNeedsVerification: (email: String, verificationId: String) -> Unit
     ) {
-        val email = _uiState.value.email
+        val email = normalizeEmail(_uiState.value.email)
         val password = _uiState.value.password
 
         _uiState.update { it.copy(isLoading = true) }
