@@ -27,8 +27,12 @@ data class LoginUiState(
     val showSnackbar: Boolean = false,
     val snackbarMessage: String = "",
     val isLoading: Boolean = false,
+    val isGoogleLoading: Boolean = false,
     val googleErrorMessage: String? = null
-)
+) {
+    /** Either sign-in is running: each button shows its own spinner, but both stay disabled meanwhile. */
+    val isBusy: Boolean get() = isLoading || isGoogleLoading
+}
 
 class LoginViewModel(
     private val authRepository: AuthRepository = AuthRepositoryImpl(),
@@ -78,7 +82,7 @@ class LoginViewModel(
     }
 
     fun loginWithGoogle(context: Context, serverClientId: String, onLoginSuccess: () -> Unit) {
-        _uiState.update { it.copy(isLoading = true, googleErrorMessage = null) }
+        _uiState.update { it.copy(isGoogleLoading = true, googleErrorMessage = null) }
         viewModelScope.launch {
             val result = getGoogleIdToken(context, serverClientId)
                 .mapCatching { idToken -> authRepository.loginWithGoogle(idToken).getOrThrow() }
@@ -87,13 +91,13 @@ class LoginViewModel(
                     val user = auth.currentUser
                     authRepository.createUser(user?.displayName ?: "", user?.email ?: "", null)
                 }
-                _uiState.update { it.copy(isLoading = false) }
+                _uiState.update { it.copy(isGoogleLoading = false) }
                 onLoginSuccess()
             }.onFailure { e ->
                 Log.e("LoginViewModel", "Google sign-in failed", e)
                 val message = if (e is GetCredentialCancellationException) null
                     else e.message ?: "Erro ao entrar com Google"
-                _uiState.update { it.copy(isLoading = false, googleErrorMessage = message) }
+                _uiState.update { it.copy(isGoogleLoading = false, googleErrorMessage = message) }
             }
         }
     }
