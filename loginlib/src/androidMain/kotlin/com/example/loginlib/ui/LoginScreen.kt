@@ -79,6 +79,7 @@ fun LoginScreen(navController: NavHostController, serverClientId: String, onLogi
                     )
                 },
                 isLoading = uiState.isLoading,
+                enabled = !uiState.isBusy,
                 text = "Login",
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary
@@ -87,6 +88,8 @@ fun LoginScreen(navController: NavHostController, serverClientId: String, onLogi
             Spacer(modifier = Modifier.height(18.dp))
 
             GoogleSignInButton(
+                isLoading = uiState.isGoogleLoading,
+                enabled = !uiState.isBusy,
                 onClick = { viewModel.loginWithGoogle(context, serverClientId, onLoginSuccess) }
             )
             uiState.googleErrorMessage?.let { message ->
