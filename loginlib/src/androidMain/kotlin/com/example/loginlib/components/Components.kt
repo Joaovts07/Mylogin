@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -125,6 +126,8 @@ fun PasswordInput(
 fun GoogleSignInButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
+    enabled: Boolean = true,
     text: String = stringResource(R.string.loginlib_google_sign_in),
     containerColor: Color = MaterialTheme.colorScheme.surface,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
@@ -135,16 +138,28 @@ fun GoogleSignInButton(
         modifier = modifier
             .fillMaxWidth()
             .height(48.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = containerColor),
+        enabled = enabled && !isLoading,
+        colors = ButtonDefaults.buttonColors(containerColor = containerColor).let {
+            // Loading disables the button, but it keeps its colour so the spinner stays readable on it.
+            if (isLoading) it.copy(disabledContainerColor = containerColor) else it
+        },
         shape = RoundedCornerShape(8.dp),
         border = BorderStroke(1.dp, borderColor)
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_google),
-            contentDescription = null,
-            modifier = Modifier.size(24.dp)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(text = text, color = contentColor, fontSize = 16.sp)
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(ButtonDefaults.IconSize),
+                color = contentColor,
+                strokeWidth = 2.dp
+            )
+        } else {
+            Image(
+                painter = painterResource(id = R.drawable.ic_google),
+                contentDescription = null,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = text, color = contentColor, fontSize = 16.sp)
+        }
     }
 }

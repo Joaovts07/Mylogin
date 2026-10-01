@@ -27,7 +27,8 @@ fun LoadingButton(
         modifier = Modifier.fillMaxWidth().height(48.dp),
         shape = RoundedCornerShape(8.dp),
         enabled = enabled,
-        colors = colors
+        // Loading disables the button, but it keeps its colour so the spinner stays readable on it.
+        colors = if (isLoading) colors.copy(disabledContainerColor = colors.containerColor) else colors
     ) {
         if (isLoading) {
             CircularProgressIndicator(
