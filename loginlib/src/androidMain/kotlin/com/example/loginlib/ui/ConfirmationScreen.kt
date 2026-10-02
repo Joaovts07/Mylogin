@@ -1,4 +1,4 @@
-package com.example.mylogin.ui
+package com.example.loginlib.ui
 
 import android.app.Activity
 import android.util.Log
@@ -33,7 +33,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.loginlib.firebase.PhoneAuthState
 import com.example.loginlib.firebase.PhoneAuthentication
-import com.example.mylogin.viewmodel.ConfirmationViewModel
+import com.example.loginlib.viewmodel.ConfirmationViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -1,4 +1,4 @@
-package com.example.mylogin.ui
+package com.example.loginlib.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,17 +15,20 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.loginlib.components.LoadingButton
 import com.example.loginlib.components.EmailInput
+import com.example.loginlib.components.GoogleSignInButton
 import com.example.loginlib.components.PasswordInput
-import com.example.mylogin.viewmodel.LoginViewModel
+import com.example.loginlib.viewmodel.LoginViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(navController: NavHostController, onLoginSuccess: () -> Unit) {
+fun LoginScreen(navController: NavHostController, serverClientId: String, onLoginSuccess: () -> Unit) {
+    val context = LocalContext.current
     val viewModel: LoginViewModel = viewModel { LoginViewModel() }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -81,6 +84,15 @@ fun LoginScreen(navController: NavHostController, onLoginSuccess: () -> Unit) {
                     containerColor = MaterialTheme.colorScheme.primary
                 )
             )
+            Spacer(modifier = Modifier.height(18.dp))
+
+            GoogleSignInButton(
+                onClick = { viewModel.loginWithGoogle(context, serverClientId, onLoginSuccess) }
+            )
+            uiState.googleErrorMessage?.let { message ->
+                Text(message, color = MaterialTheme.colorScheme.error)
+            }
+
             Spacer(modifier = Modifier.height(18.dp))
 
             Text(

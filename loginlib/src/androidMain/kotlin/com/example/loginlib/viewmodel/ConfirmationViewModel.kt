@@ -1,4 +1,4 @@
-package com.example.mylogin.viewmodel
+package com.example.loginlib.viewmodel
 
 import android.app.Activity
 import androidx.lifecycle.ViewModel

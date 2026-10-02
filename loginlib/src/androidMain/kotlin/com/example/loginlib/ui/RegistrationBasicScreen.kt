@@ -1,4 +1,4 @@
-package com.example.mylogin.ui
+package com.example.loginlib.ui
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -13,7 +13,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.loginlib.validators.DateMaskTransformation
-import com.example.mylogin.viewmodel.RegistrationBasicViewModel
+import com.example.loginlib.viewmodel.RegistrationBasicViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

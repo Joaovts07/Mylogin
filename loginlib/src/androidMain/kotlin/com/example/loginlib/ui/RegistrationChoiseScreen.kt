@@ -1,4 +1,4 @@
-package com.example.mylogin.ui
+package com.example.loginlib.ui
 
 import android.app.Activity
 import androidx.compose.foundation.layout.Column
@@ -30,7 +30,7 @@ import androidx.navigation.NavController
 import com.example.loginlib.components.EmailInput
 import com.example.loginlib.components.PasswordInput
 import com.example.loginlib.validators.PhoneNumberMaskTransformation
-import com.example.mylogin.viewmodel.RegistrationChoiseViewModel
+import com.example.loginlib.viewmodel.RegistrationChoiseViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
